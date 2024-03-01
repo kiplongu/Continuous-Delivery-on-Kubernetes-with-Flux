@@ -100,6 +100,8 @@ kubectl get nodes
 
 ![Set Up the Kubernetes Cluster with Kind](image.png)
 
+![Verify if it is running](image-1.png)
+
 Important commands
 
 List Available Contexts:
