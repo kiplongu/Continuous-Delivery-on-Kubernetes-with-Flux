@@ -68,3 +68,72 @@ suspend
 check
 create
 uninstall
+
+Bootstrap a Flux Environment
+
+Bootstrapping Flux means you would:
+
+Install the components of the Flux/GitOps Toolkit, including various controllers, CRDs,
+RBAC and Network Policies
+Set up a repository which would be used by Flux CD. Either create a new one, or use an
+existing repo provided
+Set up a Deploy Key (read-only) to connect to the repository created above so that
+FluxCD can sync with it
+Begin with a pre-flight check:
+
+kubectl get nodes
+kubectl config get-contexts
+kubectl get pods --all-namespaces
+
+kubectl get crds
+flux check --pre
+
+If the checks pass, go ahead and set up Flux using the following bootstrap sequence:
+
+flux bootstrap github
+--owner=$GITHUB_USER \
+--repository=flux-infra \
+--branch=main \
+--path=./clusters/dev \
+--personal \
+--log-level=debug \
+--network-policy=false \
+--components=source-controller,kustomize-controller
+
+Source: [flux-bootstrap ·
+GitHub](https://gist.github.com/initcron/4d97c508ce617200263274cc48526c79)
+Validate:
+flux check
+[sample output]
+► checking prerequisites
+✔ kubectl 1.20.4 >=1.18.0-0
+✔ Kubernetes 1.20.4 >=1.16.0-0
+► checking controllers
+✔ kustomize-controller: deployment ready
+► ghcr.io/fluxcd/kustomize-controller:v0.9.3
+✔ source-controller: deployment ready
+► ghcr.io/fluxcd/source-controller:v0.9.1
+✔ all checks passed
+Expected: You should see source-controller and kustomize-controller created as
+above.
+To find out everything that Flux creates on the Kubernetes side, use the following commands:
+
+kubectl get crds
+kubectl get pods -n flux-system
+kubectl get all -n flux-system
+kubectl get clusterroles,clusterrolebindings,serviceaccounts -n
+flux-system -l "app.kubernetes.io/instance=flux-system"
+Also check the following on GitHub:
+
+A repository on GitHub with the user provided in the bootstrap command (e.g.
+https://github.com/xxxxxx/flux-infra)
+A deploy key configured for the repository above
+
+Kubernetes manifests to sync with the cluster inside the flux-system subdirectory.
+
+kustomization.yaml in the same path as above, which is read by Flux CD to
+determine which manifests to apply.
+To check the kustomisations and sources created by Flux, run:
+
+flux get kustomizations
+flux get sources git
