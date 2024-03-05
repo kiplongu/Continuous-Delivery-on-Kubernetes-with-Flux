@@ -223,3 +223,36 @@ watch kubectl get all -n instavote
 In case the reconciliation does not happen, you could trigger it manually:
 flux reconcile source git instavote
 flux reconcile kustomization vote-dev
+
+
+Generate and Commit Flux Manifests
+
+Manifests to run the kustomization and source sync can be added to the
+flux-infra/clusters/dev path of the flux-infra repo.
+Begin first by cloning the flux-infra repo that was created as part of the Flux bootstrap
+process. You must clone your own repository; the following image is just for representation.
+
+git clone https://github.com/xxxxxx/flux-infra.git
+Where you should replace xxxxxx with the actual user/org name.
+Since it's a private repository, you have to provide the credentials while cloning it.
+Once it clones, switch to the relevant path:
+
+cd
+flux-infra/clusters/dev
+To export Flux objects, you could use the export command:
+flux export [tab][tab]
+e.g.
+flux export source git instavote
+flux export kustomization vote-dev
+
+You could export the source and the kustomization as YAML and redirect the output to files:
+
+flux export source git instavote >> instavote-gitrepository.yaml
+flux export kustomization vote-dev >> vote-dev-kustomization.yaml
+
+Add and push the code to the Git repository:
+
+git status
+git add *
+git commit -am "adding source and kustomizations to deploy vote app"
+git push origin main
