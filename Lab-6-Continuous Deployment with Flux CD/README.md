@@ -256,3 +256,40 @@ git status
 git add *
 git commit -am "adding source and kustomizations to deploy vote app"
 git push origin main
+
+Configure Health Checks
+
+To understand the importance of a health check, try to break the deployment and see what
+happens.
+Edit instavote/deploy/vote/deployment.yaml from the instavote Git repo and set
+the image to the wrong tag.
+For example:
+
+Commit the changes and observe. With the next reconciliation, the kustomization reports all
+okay. For example:
+
+flux get kustomizations
+
+However, if you list the pods with kubectl get pods -n instavote, there is clearly a
+problem.
+
+This is why you need Flux to do a health check before declaring the kustomization to be ready.
+To add health checks, you could use the following command:
+
+flux create kustomization vote-dev \
+--source=instavote \
+--path="./deploy/vote" \
+--prune=true \
+--interval=1m \
+--health-check="Deployment/vote.instavote" \
+--export > vote-dev-kustomization.yaml
+
+
+Alternately, you could edit the YAML spec, and refer to Kustomize API Reference - Flux | GitOps
+Toolkit to add the health checks.
+Commit your changes and push:
+
+git add vote-dev-kustomization.yaml
+git commit -am "create kustomization for vote app"
+git push origin main
+
