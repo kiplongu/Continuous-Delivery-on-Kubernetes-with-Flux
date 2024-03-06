@@ -23,3 +23,23 @@ From the Action on Match section:
 
 This will allow the services that you expose with NodePort to be accessed from outside the
 cluster.
+
+Set Up the Visualizer
+
+The Visualiser is a third party open source application which helps you visualize not only your
+cluster nodes, but also the application workloads running as workloads on top of this cluster.
+Once you are done setting up the cluster using the instructions above, open a cloud shell and type in the following commands:
+
+git clone https://github.com/schoolofdevops/kube-ops-view
+kubectl apply -f kube-ops-view/deploy/
+
+You could access the visualizer by discovering the External IP address of any of the nodes and
+by browsing to http://NODEIP:32000.
+
+To find the NodeIP (External IP) run the following command in the Cloud Shell:
+kubectl get nodes -o wide
+where External-IP will show you the IP that you can use to connect to the cluster nodes over
+NodePort such as above (e.g. 32000).
+
+![visualizier](nodeip.png)
+
