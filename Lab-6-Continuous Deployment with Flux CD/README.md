@@ -315,3 +315,40 @@ git push origin main -f
 
 Note: If you have a branch protection rule configured, either you could remove it, or at least edit
 it to allow force pushes, such as:
+
+
+Sequencing Application Deployments
+
+If you have an application which depends on another, you could sequence the kustomization
+runs for it using the --depends-on option.
+The following example defines a dependency between the vote application, for which you
+already have the kustomization running, and redis, which you are going to deploy now by
+creating a new kustomization for it.
+
+From the path flux-infra/cluster/dev
+cd flux-infra/clusters/dev
+create the customization for redis:
+flux create kustomization redis-dev \
+--source=instavote \
+--path="./deploy/redis" \
+--prune=true \
+--interval=1m \
+--target-namespace=instavote \
+--health-check="Deployment/redis.instavote" \
+--export > redis-kustomization.yaml
+Modify the vote kustomization to Depends on:
+
+flux create kustomization vote-dev \
+--source=instavote \
+--path="./deploy/vote" \
+--prune=true \
+--interval=1m \
+--target-namespace=instavote \
+--health-check="Deployment/vote.instavote" \
+--depends-on=redis-dev \
+--export > vote-dev-kustomization.yaml
+
+Add and push the code to the Git repository and see Flux adding a new kustomization for
+redis and along with a dependency on it to the vote app.
+If you are watching for kustomizations with watch flux get kustomizations you will
+momentarily see the vote kustomization waiting for redis to reconcile first.
