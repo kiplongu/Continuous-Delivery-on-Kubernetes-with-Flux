@@ -293,3 +293,25 @@ git add vote-dev-kustomization.yaml
 git commit -am "create kustomization for vote app"
 git push origin main
 
+Automatic Deletion of Resources (Garbage Collection)
+
+Flux does support garbage collection whereas deleting a resource in Git will result in the object
+created for that resource to be deleted on the cluster as well. This is a useful feature to
+auto-clean up cluster resources to ensure it matches exactly what is currently in Git.
+To try this, switch to the workstation where you have cloned the instavote repo, and delete
+the service definition for the vote app to test this:
+
+cd instavote/deploy/vote
+git rm service.yaml
+git commit -am "delete service for vote"
+git push origin main
+
+If you are watching with kubectl get all -n instavote you should see the service
+deleted from the cluster with the next reconciliation. This is garbage collection in action.
+Once you are done testing, you could bring the service back by undoing the last commit using:
+
+git reset --hard HEAD^1
+git push origin main -f
+
+Note: If you have a branch protection rule configured, either you could remove it, or at least edit
+it to allow force pushes, such as:
