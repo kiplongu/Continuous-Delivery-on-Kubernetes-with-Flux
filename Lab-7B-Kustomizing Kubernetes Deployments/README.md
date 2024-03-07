@@ -206,3 +206,49 @@ watch kubectl get all -n instavote
 If you want to run the reconciliation manually:
 flux reconcile kustomization flux-system
 
+
+Additional Kustomization Configs
+Let's now explore a few more kustomization properties.
+Images & Replicas
+You can update images and replicas, some of the frequently updated configurations.
+file: deploy/vote/staging/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- ../base
+patchesStrategicMerge:
+- deployment.yaml
+- service.yaml
+namespace: instavote
+images:
+- name: schoolofdevops/vote
+newTag: v4
+replicas:
+- name: vote
+count: 4
+Commit the Changes and Push
+git commit -am "configure image and replicas count"
+git push origin main
+While running, the kustomization fails:
+[Sample Error]
+vote-staging
+main@sha1:4dcfff4e
+False
+False
+Deployment/instavote/vote dry-run failed, reason: Invalid, error:
+Deployment.apps "vote" is invalid: spec.sel
+ector: Invalid value:
+v1.LabelSelector{MatchLabels:map[string]string{"app":"vote",
+"env":"staging", "project":"instavote"},
+MatchExpressions:[]v1.LabelSelectorRequirement(ni
+l)}: field is immutable
+
+This error is because you cannot change the selector configuration on an existing deployment
+(immutable field).
+In this case, to fix this error, simply delete the deployment and let Flux create it afresh with new
+configurations:
+kubectl get all -n instavote
+kubectl delete deployment vote -n instavote
+kubectl get all -n instavote
+Let Flux trigger the reconciliation and this time launch the deployment with updated
+configurations.
