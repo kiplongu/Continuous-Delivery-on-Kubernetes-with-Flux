@@ -110,3 +110,26 @@ Ensure you replace the context names with the actual ones.
 To further validate, try listing all the pods. This should show the relevant pods from the cluster
 chosen.
 kubectl get pods --all-namespaces
+
+
+
+Bootstrap Flux for the Staging Cluster
+
+Check the prerequisites:
+
+A configured Kubernetes cluster (e.g. the GKE cluster created above)
+Git repository (flux-infra)
+Git user and token configured in the environment.
+Begin by running a pre-flight check:
+flux check --pre
+To bootstrap the staging cluster with the existing flux-infra repo, run the following
+command:
+flux bootstrap github
+--owner=$GITHUB_USER
+--repository=flux-infra \
+--branch=main \
+--path=./clusters/staging \
+--personal \
+--log-level=debug \
+--network-policy=false
+__________________________
