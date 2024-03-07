@@ -262,3 +262,38 @@ project: instavote
 env: staging
 commonAnnotations:
 supported-by: "sre@example.com"
+
+
+# ConfigMaps and Generator Options
+
+Add the following snippet to kustomization.yaml to automatically generate a ConfigMap for
+the vote app:
+configMapGenerator:
+- name: vote
+literals:
+- OPTION_A=STAGING
+- OPTION_B=DEV
+Also add the code to reference the ConfigMap, as in:
+File: `instavote/deploy/vote/stagin/deployment.yaml`
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+creationTimestamp: null
+labels:
+app: vote
+name: vote
+spec:
+replicas: 5
+template:
+spec:
+containers:
+- image: schoolofdevops/vote:v3
+name: vote
+envFrom:
+- configMapRef:
+name: vote
+optional: true
+git commit -am "generate configmap from literals"
+git push origin main
+Watch the application redeployed with the next reconciliation run. Validate by visiting the app,
+which should now show the options provided above.
