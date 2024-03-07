@@ -26,3 +26,17 @@ mv kustomize /usr/local/bin/
 kustomize
 Alternately, refer to Kustomize | SIG CLI to find the various options and detailed instructions to
 install kustomize.
+
+Restructure the Deployment Code for Kustomize
+
+You have already created basic Kubernetes deployment manifests. Begin by restructuring these
+configurations so that you could provide multiple overlays.
+From the application repository which hosts your deployment code, run the following to create
+the base + overlay structure:
+cd instavote/deploy/vote
+mkdir base
+git mv deployment.yaml
+service.yaml base/
+cd base
+kustomize create --autodetect
+cd ..
