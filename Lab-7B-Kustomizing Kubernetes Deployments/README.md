@@ -40,3 +40,53 @@ service.yaml base/
 cd base
 kustomize create --autodetect
 cd ..
+
+
+Create Custom Configurations for Dev
+
+Now, add the overlay files (custom configuration) for dev.
+From inside the deploy/vote path:
+mkdir dev
+cd dev
+file: deploy/vote/dev/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+creationTimestamp: null
+labels:
+app: vote
+name: vote
+spec:
+minReadySeconds: 20
+replicas: 3
+template:
+spec:
+containers:
+- image: schoolofdevops/vote:v4
+name: vote
+
+file: deploy/vote/dev/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- ../base
+patchesStrategicMerge:
+- deployment.yaml
+Commit these changes to the application deployment repo (instavote).
+From /instavote/deploy/vote:
+git add *
+git status
+git commit -am “refactored code with kustomize overlays”
+git push origin main
+It’s now time to update the path to the kustomization configuration in the flux-infra
+repository. Update the path as:
+
+file: ./flux-infra/cluster/dev/vote-dev-kustomization.yaml
+spec:
+path: ./deploy/vote/dev
+Commit all the changes and push:
+git commit -am "updated the path to find manifests"
+git push origin main
+Keep watching for the reconciliation to the dev environment:
+
+watch flux get kustomizations --context=dev
