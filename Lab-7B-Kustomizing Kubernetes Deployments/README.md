@@ -209,7 +209,7 @@ flux reconcile kustomization flux-system
 
 Additional Kustomization Configs
 Let's now explore a few more kustomization properties.
-Images & Replicas
+# Images & Replicas
 You can update images and replicas, some of the frequently updated configurations.
 file: deploy/vote/staging/kustomization.yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
@@ -252,3 +252,13 @@ kubectl delete deployment vote -n instavote
 kubectl get all -n instavote
 Let Flux trigger the reconciliation and this time launch the deployment with updated
 configurations.
+
+
+# Common Labels and Annotations
+You could apply labels and annotations to all the resources by adding the following snippet to
+kustomization.yaml:
+commonLabels:
+project: instavote
+env: staging
+commonAnnotations:
+supported-by: "sre@example.com"
