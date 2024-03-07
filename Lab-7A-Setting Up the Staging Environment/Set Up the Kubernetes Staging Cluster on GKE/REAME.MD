@@ -132,4 +132,15 @@ flux bootstrap github
 --personal \
 --log-level=debug \
 --network-policy=false
-__________________________
+______________________
+
+Rename Cluster Contexts
+
+kubectl config rename-context gke_gitops-xxx staging
+kubectl config rename-context kind-kind dev
+Note: replace the context names with the actual ones.
+Now list the Flux components with default and specific Kubernetes contexts, as in:
+flux get kustomizations
+flux get kustomizations --context=dev
+flux get sources git
+flux get sources git --context=dev
