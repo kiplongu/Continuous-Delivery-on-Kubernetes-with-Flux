@@ -311,3 +311,91 @@ literals:
 Now commit the changes, push and observe.
 git commit -am "testing rollout on config update"
 git push origin main
+
+
+# Create the Kustomization for Redis
+Now that you have deployed the vote app in staging, it’s time to create the kustomization for
+redis and also deploy it in the staging environment. Begin by reorganizing the code for the
+redis app.
+cd instavote
+cd deploy/redis
+mkdir base dev staging
+git mv deployment.yaml service.yaml
+cd base
+kustomize create --autodetect
+cd ../..
+mkdir dev staging
+base
+file: dev/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- ../base
+file: staging/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- ../base
+commonLabels:
+project: instavote
+env: staging
+commonAnnotations:
+supported-by: "sre@example.com"
+namespace: instavote
+Commit all the changes and publish:
+
+git add *
+git status
+git commit -am "add kustomizations for redis"
+git push origin main
+Now update the existing kustomization for redis, as well as add the redis-staging
+kustomization in the flux-infra repo.
+file: ./flux-infra/clusters/dev/redis-kustomization.yaml
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta1
+kind: Kustomization
+metadata:
+name: redis-dev
+namespace: flux-system
+spec:
+healthChecks:
+- kind: Deployment
+name: redis
+namespace: instavote
+interval: 1m0s
+path: ./deploy/redis/dev
+
+prune: true
+sourceRef:
+kind: GitRepository
+name: instavote
+targetNamespace: instavote
+timeout: 2m0s
+
+file: ./flux-infra/clusters/staging/redis-staging-kustomization.yaml
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta1
+kind: Kustomization
+metadata:
+name: redis-dev
+namespace: flux-system
+spec:
+healthChecks:
+- kind: Deployment
+name: redis
+namespace: instavote
+interval: 1m0s
+path: ./deploy/redis/staging
+prune: true
+sourceRef:
+kind: GitRepository
+name: instavote
+targetNamespace: instavote
+timeout: 2m0s
+git add *
+git commit -am "added redis
+git push origin main
+kustomizations for staging"
+Watch for the next reconciliation run. Ensure that when you submit a vote from the frontend
+vote app, it shows a tick mark instead of an error.
+
