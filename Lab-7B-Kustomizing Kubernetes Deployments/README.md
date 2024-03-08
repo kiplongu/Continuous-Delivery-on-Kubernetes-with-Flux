@@ -297,3 +297,17 @@ git commit -am "generate configmap from literals"
 git push origin main
 Watch the application redeployed with the next reconciliation run. Validate by visiting the app,
 which should now show the options provided above.
+
+Exercise: Update the literal values provided in the ConfigMap to see the application roll out a
+new version for configuration update.
+
+For example, update the literals in kustomization.yaml:
+
+configMapGenerator:
+- name: vote
+literals:
+- OPTION_A=FluxCD
+- OPTION_B=ArgoCD
+Now commit the changes, push and observe.
+git commit -am "testing rollout on config update"
+git push origin main
