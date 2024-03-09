@@ -401,3 +401,13 @@ vote app, it shows a tick mark instead of an error.
 ![Validate vote](vote.png)
 This validates you have vote and redis applications running and interconnected.
 
+
+# Nano Project
+Set up Kustomization to deploy the worker app in staging.
+● Worker is deployed with the image schoolofdevops/worker:latest
+● Worker needs a deployment but no service, as there are no incoming connections to
+the worker app.
+● One instance of the worker pod is sufficient.
+● Create environment-specific overlays to support custom configurations in the future.
+Worker has a dependency on redis.
+![worker pod up and runing](image-1.png)
