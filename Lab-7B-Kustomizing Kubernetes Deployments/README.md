@@ -398,4 +398,6 @@ git push origin main
 kustomizations for staging"
 Watch for the next reconciliation run. Ensure that when you submit a vote from the frontend
 vote app, it shows a tick mark instead of an error.
+![Validate vote](vote.png)
+This validates you have vote and redis applications running and interconnected.
 
