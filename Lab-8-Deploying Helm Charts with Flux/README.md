@@ -137,3 +137,37 @@ git add *
 git status
 git commit -am "add chart for result app"
 git push origin main
+
+# Release a Chart Using the Git Repo as a Source
+
+flux create helmrelease result \
+--interval=10m \
+--source=HelmRepository/lfs269 \
+--chart=./deploy/charts/result \
+--target-namespace=instavote
+
+--export
+flux create helmrelease result \
+--interval=10m \
+--source=HelmRepository/lfs269 \
+--chart=./deploy/charts/result \
+--target-namespace=instavote
+
+Validate by running:
+flux get helmreleases
+flux get sources all
+You should see the following objects created:
+A HelmRelease object to generate and deploy a chart for the result app
+A HelmChart for result created from GitRepository as source using the spec
+defined with HelmRelease
+Generate and commit changes to deploy the result app:
+cd flux-infra/clusters/staging
+flux create helmrelease result \
+--interval=10m \
+--source=GitRepository/vote \
+--chart=./deploy/charts/result \
+--target-namespace=instavote \
+--export > result-staging-helmrelease.yaml
+git add result-stage-helmrelease.yaml
+git commit -am "added result helm release"
+git push origin main
