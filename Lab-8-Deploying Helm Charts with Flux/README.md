@@ -105,3 +105,35 @@ git add *
 git status
 git commit -am "added db helm deployment"
 git push origin main
+
+# Generate a Chart for the result App
+
+result is a user-facing application which should be deployed with the following spec:
+Container image : schoolofdevops/vote-result
+Service Type: NodePort
+cd instavote/deploy
+mkdir charts
+cd charts
+helm create result
+cd result
+Edit values.yaml to update:
+
+The image repository and tag to schoolofdevops/vote-result:latest
+The service to NodePort
+file: values.yaml
+image:
+repository: schoolofdevops/vote-result
+pullPolicy: IfNotPresent
+# Overrides the image tag whose default is the chart appVersion.
+tag: "latest"
+service:
+type: NodePort
+port: 80
+..... keep remaining file unchanged
+file: `Chart.yaml`
+appVersion: "1.0.0"
+Once edited, commit the content of the charts directory and push it to GitHub:
+git add *
+git status
+git commit -am "add chart for result app"
+git push origin main
