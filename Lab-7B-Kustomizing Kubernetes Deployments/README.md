@@ -411,3 +411,10 @@ the worker app.
 ● Create environment-specific overlays to support custom configurations in the future.
 Worker has a dependency on redis.
 ![worker pod up and runing](image-1.png)
+
+# References
+Kustomize.io Kustomize - Kubernetes native configuration management
+Kustomize Binary Installation : Binaries | SIG CLI
+Kustomize Patch Generator: Kustomize
+Bases vs Resources: bases | SIG CLI
+Kustomization File Spec: The Kustomization File | SIG CLI
