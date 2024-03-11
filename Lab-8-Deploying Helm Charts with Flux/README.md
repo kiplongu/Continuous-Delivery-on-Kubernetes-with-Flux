@@ -171,3 +171,15 @@ flux create helmrelease result \
 git add result-stage-helmrelease.yaml
 git commit -am "added result helm release"
 git push origin main
+
+
+# References:
+
+Installing Helm Helm | Installing Helm
+Helm Helm
+Helm Charts Helm | Charts
+Overview of Helm Controller for Flux Overview - Flux | GitOps Toolkit
+HelmRepository CRD Source API Reference - Flux | GitOps Toolkit
+HelmRelease CRD Helm API Reference - Flux | GitOps Toolkit
+Supercharge your Kubernetes Deployments - Helm YouTube
+Helm Users! What Flux 2 can do for you! (Scott Rigby) YouTube
