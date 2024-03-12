@@ -44,3 +44,27 @@ Data
 address:
 79 bytes
 You must see the address field defined as a key as part of the Data section.
+
+# Add a Provider to Connect to Slack from Flux
+
+Check the prerequisites before creating the provider.
+flux check
+kubectl get crds
+flux get alert-providers
+Now begin to create the provider and export it as yaml without applying:
+flux create alert-provider slack \
+--type=slack \
+--channel= xxxxx \
+--secret-ref=slack-url --export
+
+Replace xxxxx with the actual Slack channel that you would like the notifications to be sent to.
+Review the configuration and then proceed to create the provider by removing the --export
+option:
+flux create alert-provider slack
+--type=slack \
+--channel=xxxxx \
+--secret-ref=slack-url
+
+Validate:
+
+flux get alert-providers
