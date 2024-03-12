@@ -136,3 +136,62 @@ Data
 ====
 token:40 bytes
 
+# Create Providers and Alerts to Update the Commit Status
+Begin by creating the core for the provider which points to the same repository that you have
+configured as the GitRepository source.
+flux create alert-provider github-instavote \
+--type=github \
+--address=https://github.com/xxxxxx/instavote \
+--secret-ref=github-token --export
+flux create alert-provider github-instavote \
+--type=github \
+--address=https://github.com/xxxxxx/instavote \
+--secret-ref=github-token --export
+Note: Make sure to replace https://github.com/xxxxxx/instavote with the actual repo.
+It should be the same repo as defined in the GitRepository source.
+Validate with:
+flux get alert-providers
+
+Now, go ahead and set up an alert which would update the commit status for the
+vote-staging kustomization run:
+flux create alert vote-staging \
+--provider-ref=github-instavote \
+--event-severity info \
+--event-source Kustomization/vote-staging --export
+flux create alert vote-staging \
+--provider-ref=github-instavote \
+--event-severity info \
+--event-source Kustomization/vote-staging
+Since these alerts are created with a specific kustomization which maps to one application, you
+will create as many alerts matching the number of kustomizations you have. (e.g. redis,
+worker).
+To check the names of your customisations, run:
+flux get kustomizations
+Now create alerts for Redis and Worker e.g.
+flux create alert redis-staging \
+--provider-ref=github-instavote \
+--event-severity info \
+--event-source Kustomization/redis-staging
+flux create alert worker-staging \
+--provider-ref=github-instavote \
+--event-severity info \
+--event-source Kustomization/worker-staging
+And validate all the alerts are in place with:
+flux get alerts
+
+Now, browse to the GitHub repo and validate that the status updates are reflected right from the
+commit messages.
+
+You may trigger a new reconciliation by updating an image for the vote application from staging
+kustomization.yaml and validate further.
+Once validated, don’t forget to generate and revision control the yaml manifests for these alerts
+and the provider created:
+flux export alert-provider github-instavote >
+github-instavote-provider.yaml
+flux export alert vote-staging > vote-staging-alert.yaml
+flux export alert worker-staging > worker-staging-alert.yaml
+flux export alert redis-staging > redis-staging-alert.yaml
+git add github-instavote-provider.yaml *alert.yaml
+git status
+git commit -am "add git commit status"
+git push origin main
