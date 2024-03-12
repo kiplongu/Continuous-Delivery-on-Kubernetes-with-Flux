@@ -195,3 +195,18 @@ git add github-instavote-provider.yaml *alert.yaml
 git status
 git commit -am "add git commit status"
 git push origin main
+
+# Set Up Push-Based Reconciliation
+Begin by first updating the interval for all staging Kustomizations, as well as for
+GitRepository to 1h so that you could test push-based reconciliation.
+For example:
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta1
+kind: Kustomization
+metadata:
+namespace: flux-system
+spec:
+interval: 1h
+path: ./deploy/vote/staging
+prune: true
+file continued ...
