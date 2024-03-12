@@ -68,3 +68,49 @@ flux create alert-provider slack
 Validate:
 
 flux get alert-providers
+
+
+# Set Up an Alert to Send Notifications to Slack
+
+Now, create an Alert to send notifications to Slack using the provider created above to track the
+changes for the following resources:
+
+Kustomization/*
+GitRepository/*
+HelmRelease/*
+flux create alert slack-notif \
+--provider-ref=slack \
+--event-source=GitRepository/* \
+--event-source=Kustomization/* \
+--event-source=HelmRelease/* \
+--event-severity=info \
+--export
+Review the YAML and then create the alert:
+flux create alert slack-notif \
+--provider-ref=slack \
+--event-source=GitRepository/* \
+--event-source=Kustomization/*\
+--event-source=HelmRelease/* \
+--event-severity=info
+Validate by listing alerts:
+
+flux get alert
+
+You should now see an alert definition added with the name slack-notif. If you start
+watching the Slack channel configured with the provider configurations, you should now see
+incoming notifications from FluxCD when some of the following events happen:
+when reconciliation makes a change (create/update/delete)
+when health checks pass after the change
+when a dependency is taking longer, delaying the reconciliation
+when the reconciliation fails
+
+Once validated, generate and commit the provider + alert configurations to
+flux-infra/clusters/staging as in:
+flux export alert slack-notif > slack-notif-alert.yaml
+flux export alert-provider slack > slack-provider.yaml
+git add slack-*
+git status
+git commit -am "add slack notifications"
+git push origin main
+
+![Alerts Notification](image.png)
