@@ -114,3 +114,25 @@ git commit -am "add slack notifications"
 git push origin main
 
 ![Alerts Notification](image.png)
+
+
+# Automating Status Notifications to GitHub
+
+# Set Up Authentication to GitHub with a Secret
+Generate a personal access token with repo access and store it as a Kubernetes secret using:
+kubectl create secret -n flux-system generic github-token
+--from-literal=token=xxxxxx
+Replace xxxxxx with the actual token with write access to your Git repo.
+Validate:
+kubectl describe secret -n flux-system github-token
+[sample output]
+Name:github
+Namespace:flux-system
+Labels:
+Annotations:
+
+Type:Opaque
+Data
+====
+token:40 bytes
+
