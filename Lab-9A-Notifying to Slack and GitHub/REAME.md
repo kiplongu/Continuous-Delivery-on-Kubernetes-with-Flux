@@ -275,3 +275,35 @@ create secret generic webhook-token \
 Validate:
 kubectl -n flux-system get secret webhook-token
 kubectl -n flux-system describe secret webhook-token
+
+# Create a Receiver to Accept GitHub Events
+flux create receiver instavote \
+--type github \
+--event ping \
+--event push \
+--secret-ref webhook-token \
+--resource GitRepository/instavote \
+--export
+
+After reviewing the YAML, create the receiver:
+flux create receiver instavote\
+--type github \
+--event ping \
+--event push \
+--secret-ref webhook-token \
+--resource GitRepository/instavote
+Validate the Receiver is created and also fetch the webhook URL:
+flux get receivers
+[sample output]
+NAME
+READYMESSAGE
+SUSPENDED
+instavoteTrue Receiver initialised with URL:
+/hook/3ce6b83b91ee5bf7e44485fb631f1788ea86c018ddedab511e8252cf13e527d0
+False
+Now generate the following and write it down:
+Payload URL: http://<NODEIP>:<NODEPORT>/RECEIVER_URL
+Secret: Content of the echo $GITHUB_TOKEN command
+Example of a Payload URL is as follows:
+http://143.198.50.211:31234/hook/3ce6b83b91ee5bf7e44485fb631f1788ea86c
+018ddedab511e8252cf13e527d0
