@@ -210,3 +210,54 @@ interval: 1h
 path: ./deploy/vote/staging
 prune: true
 file continued ...
+
+# Expose the Webhook Receiver Service
+In this use case, the push-based model would work only if your Kubernetes cluster is hosted
+publicly and you could create an incoming webhook which can then be accessed from GitHub
+as a source. If your Kubernetes environment is behind a firewall, you would still configure
+sources such as Jenkins, Container Registries, Git services, which are privately hosted and
+have access to the Kubernetes environment.
+
+Now, go ahead and patch the webhook-receiver service so that it is exposed outside and
+can be accessed by GitHub.
+file:
+flux-infra/clusters/staging/flux-system/expose-webhook-receiver.yaml
+apiVersion: v1
+kind: Service
+metadata:
+name: webhook-receiver
+namespace: flux-system
+spec:
+ports:
+- name: http
+port: 80
+protocol: TCP
+targetPort: http-webhook
+nodePort: 31234
+selector:
+app: notification-controller
+type: NodePort
+
+Note: Instead of the NodePort above, you could also use a LoadBalancer service with public
+cloud platforms.
+Now edit the following file to add patchesStrategicMerge as in:
+file: flux-infra/clusters/staging/flux-system/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- gotk-components.yaml
+- gotk-sync.yaml
+patchesStrategicMerge:
+- expose-webhook-receiver.yaml
+Commit these changes and push to the GitHub repo:
+git add expose-webhook-receiver.yaml
+git diff
+git commit -am "expose webhook receiver as nodeport"
+git push origin main
+Wait for a minute, or for the changes to be reconciled with the cluster, and then validate.
+
+You could alternately run Flux once and then validate the service as:
+flux reconcile kustomization flux-system
+kubectl get svc -n flux-system
+This time you should see the webhook-receiver service exposed on port 31234 with
+NodePort as service type.
