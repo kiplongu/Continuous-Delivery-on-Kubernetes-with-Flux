@@ -261,3 +261,17 @@ flux reconcile kustomization flux-system
 kubectl get svc -n flux-system
 This time you should see the webhook-receiver service exposed on port 31234 with
 NodePort as service type.
+
+# Define an Authentication Token
+Time to define an authentication token, which would be validated by the Notification Controller
+for incoming webhooks.
+Generate a random token and write it to be configured with GitHub later:
+WEBHOOK_TOKEN=`date | md5sum | cut -d ' ' -f1`
+echo $WEBHOOK_TOKEN
+Store this token as a Kubernetes secret:
+kubectl -n flux-system \
+create secret generic webhook-token \
+--from-literal=token=$WEBHOOK_TOKEN
+Validate:
+kubectl -n flux-system get secret webhook-token
+kubectl -n flux-system describe secret webhook-token
