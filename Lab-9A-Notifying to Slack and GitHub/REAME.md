@@ -307,3 +307,29 @@ Secret: Content of the echo $GITHUB_TOKEN command
 Example of a Payload URL is as follows:
 http://143.198.50.211:31234/hook/3ce6b83b91ee5bf7e44485fb631f1788ea86c
 018ddedab511e8252cf13e527d0
+
+# Configure WebHook from GitHub Repository
+From the Application Deployment Code Repo (Instavote), from Settings => Webhooks => Add
+Webhook:
+Add the Payload URL and Token noted earlier and proceed to Add Webhook.
+
+After adding the webhook, you should see GitHub testing it. If you see a check mark, it's all
+working okay.
+Validating
+To validate, start watching the kustomisations:
+watch flux get kustomizations
+Push an update. e.g. update the image tag for the vote app, push the changes to the repo and
+watch the commit history, as well as the kusomization status as above.
+You shall see Flux reconcile.
+
+Do note the commit id, go to the commit history on GitHub, and tally that it has run the
+kustomization for the same commit id and update it.
+
+You could further make another change and push to verify that it's being triggered from GitHub
+and is not due to the pull interval configured with Flux.
+
+# Summary
+With this lab you learned how to use notifications and alerting systems that Flux supports to set
+up integration with various external systems. This includes sending notifications to Slack on Flux
+changes, updating GitHub commit status messages, as well as triggering Flux runs on code
+changes to Git.
