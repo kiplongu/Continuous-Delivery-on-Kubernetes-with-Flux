@@ -100,3 +100,40 @@ Where you replace xxxxx with the actual name of the pipeline run.
 You may see that the pipeline run exits with an error or hangs while trying to push the image to
 the registry. This is expected as Kaniko needs registry secrets in order to authenticate and push
 a container image.
+
+
+
+# Set Up Continuous Integration for the Result App
+Since you already have a template in the form of a pipeline, setting up CI for the result app is
+just a matter of creating an instance of it, by providing application-specific (result app) inputs.
+That's what you do by creating a pipeline run object.
+You will find the pipeline run spec in the same repository you have cloned along with the code
+for the vote pipeline run.
+Update the params as earlier.
+file: result-ci-pipelinerun.yaml
+params:
+- name: repoUrl
+value: https://github.com/initcron/instavote.git
+
+- name: revision
+value: master
+- name: sparseCheckoutDirectories
+value: /result/
+- name: imageUrl
+value: initcron/tknresult
+- name: pathToContext
+value: result
+
+kubectl create -f result-ci-pipelinerun.yaml
+Validate and watch the pipeline run with:
+tkn pr list
+tkn pr logs --last --follow --all
+Validate by checking if the container image is published on Docker Hub for the result app.
+
+# References
+
+Install Tekton Getting Started | Tekton
+Tekton Core Concepts Concepts | Tekton
+Tekton Catalogue GitHub - tektoncd/catalog: Catalog of shared Tasks and Pipelines.
+Tekton Official Page Tekton
+Tekton Triggers triggers/docs/getting-started at v0.10.1 · tektoncd/triggers · GitHub
