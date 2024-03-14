@@ -66,3 +66,37 @@ kubectl apply -f instavote-ci-pipeline.yaml
 Validate:
 tkn p list
 tkn p describe instavote-ci
+
+
+# Create a Pipeline Run for the Vote App
+PipelineRun allows you to launch an actual CI pipeline by creating an instance of a template
+(Pipeline) with application-specific inputs (resources).
+Edit the vote-ci-pipelinrun.yaml file with actual values. Following are the parameters
+displayed from the pipeline run file:
+params:
+- name: repoUrl
+value: https://github.com/xxxxxx/instavote.git
+- name: revision
+value: main
+- name: sparseCheckoutDirectories
+value: /vote/
+- name: imageUrl
+value: xxxxxx/vote
+- name: pathToContext
+value: vote
+Replace values for:
+repoUrl: to point to the repository where your application source is
+imageUrl: to point to your Docker Hub / Registry user/org ID to publish the image to
+Begin by listing the Pipelines and PipelineRuns as:
+tkn p list
+tkn pr list
+Launch a pipeline run for the vote app as:
+kubectl create -f vote-ci-pipelinerun.yaml
+
+Validate and watch the pipeline run with:
+tkn pr list
+tkn pr logs -f vote-xxxxx
+Where you replace xxxxx with the actual name of the pipeline run.
+You may see that the pipeline run exits with an error or hangs while trying to push the image to
+the registry. This is expected as Kaniko needs registry secrets in order to authenticate and push
+a container image.
