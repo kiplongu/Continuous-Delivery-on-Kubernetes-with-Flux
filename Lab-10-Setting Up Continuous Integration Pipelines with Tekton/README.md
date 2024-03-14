@@ -56,3 +56,13 @@ Similarly, install the Kaniko task, which would read the Dockerfile and build an
 To install the Kaniko task:
 tkn hub install task kaniko
 tkn t list
+
+# Create a Tekton Pipeline Resource
+tkn p list
+tkn t list
+git clone https://github.com/lfs269/tekton-ci.git
+cd tekton-ci/base
+kubectl apply -f instavote-ci-pipeline.yaml
+Validate:
+tkn p list
+tkn p describe instavote-ci
