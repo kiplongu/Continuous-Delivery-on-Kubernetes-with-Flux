@@ -35,3 +35,24 @@ Validate:
 tkn
 tkn version
 Some Tekton subcommands:
+
+# Set Up Continuous Integration Pipeline with Tekton
+
+# Set Up Prerequisite Tekton Tasks
+Begin to create the following prerequisite tasks:
+
+git-clone: used to clone the source repository and pass on the latest commit hash to
+other tasks
+kaniko: used to build Docker images and publish those to the registry. This is a cleaner
+Kubernetes native solution than using Docker-based image builds.
+You can search for a catalog of tasks that comes with Tekton from:
+
+Tekton Hub (beta): Tekton Hub
+Tekton Catalog Repo: GitHub - tektoncd/catalog: Catalog of shared Tasks and Pipelines.
+To add the git-clone task, run:
+
+tkn hub install task git-clone
+Similarly, install the Kaniko task, which would read the Dockerfile and build an image out of it.
+To install the Kaniko task:
+tkn hub install task kaniko
+tkn t list
