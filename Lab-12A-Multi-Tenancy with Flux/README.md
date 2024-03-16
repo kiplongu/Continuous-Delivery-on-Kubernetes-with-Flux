@@ -126,3 +126,19 @@ flux get kustomization
 kubectl get ns
 kubectl get all -n facebooc
 
+# Onboarding Your Project to a Multi-Tenant Flux Environment
+Initialize the Deploy Repo
+Create a new repository called instavote-deploy to host the Project Deployment Code.
+Clone this repository, switch to the root of the repo and create the scaffold for the deployment
+repo:
+curl -fsSL
+https://raw.githubusercontent.com/lfs269/setup/main/setup_project_repo
+.sh | bash -
+Validate
+tree
+
+Commit and push this structure with:
+git add *
+git commit -am "generated deploy repo scaffold"
+git push origin main
+
