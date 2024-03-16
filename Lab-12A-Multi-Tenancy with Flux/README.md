@@ -91,3 +91,38 @@ kubectl get namespace $PENDING_NAMESPACE -o json
 | kubectl replace
 --raw /api/v1/namespaces/$PENDING_NAMESPACE/finalize -f -
 Source: Delete a namespace which is pending termination due to a finalizer. · GitHub
+
+
+# Rebootstrapping Staging with Fleet Repo and a Tenant
+Create the Fleet Repository
+Fork this repository (GitHub - lfs269/flux-fleet) to create your own flux-fleet repository.
+Observe the configurations in the following repos to understand the structure and purpose of
+each:
+Fleet Repo : GitHub - lfs269/flux-fleet
+Project Deployment (Tenant) : GitHub - lfs269/facebooc-deploy
+Application Source Code : GitHub - lfs269/facebooc: Yet another Facebook clone
+written in C
+Bootstrap the staging cluster with a Demo Application Project as a Tenant. You are going to
+use the same command as earlier, however you would change the repository to flux-fleet
+this time.
+flux checkflux bootstrap github
+--owner=$GITHUB_USER \
+--repository=flux-fleet \
+--branch=main \
+--path=./clusters/staging \
+--personal \
+--log-level=debug \
+--network-policy=false \
+--components-extra=image-reflector-controller,image-automation-controller
+
+Validate that the cluster has been bootstrapped and is ready with all Flux components:
+flux check
+kubectl get crds
+kubectl get all -n flux-system
+Check whether the same project facebooc has been onboarded:
+flux get kustomization
+Check whether the facebooc project has been reconciled with the master:
+flux get kustomization
+kubectl get ns
+kubectl get all -n facebooc
+
