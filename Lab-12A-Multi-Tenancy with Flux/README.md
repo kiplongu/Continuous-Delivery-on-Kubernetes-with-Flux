@@ -44,3 +44,24 @@ Git repo.
 E.g.
 mkdir ~/secrets
 mv *secret* ~/secrets/
+
+# Export Flux Sync Manifests
+You have already exported and committed most of the Flux resources as part of the previous
+labs. If you have not, you could use the flux get command to list the resources, followed by
+flux export which generates the YAML code which can then be redirected to a file and be
+added to git.
+For example, let's assume you have not added the sync manifest for the notification receiver
+you had created earlier.
+To list the receivers use:
+flux get receiver
+
+Now, to display the YAML generated for this receiver, as well as to add this content to a file, use
+a tee command as follows:
+flux export receiver instavote | tee instavote-receiver.yaml
+You now have a sync manifest for the receiver created at instavote-receiver.yaml.
+You can reference the Flux Resources Checklist (Lab 12B) provided along with this lab guide
+to tally manifests against resources created so far.
+Commit All the Pending Manifests
+git add *.yaml
+git commit -am "checking in all the pending manifests"
+git push origin main
