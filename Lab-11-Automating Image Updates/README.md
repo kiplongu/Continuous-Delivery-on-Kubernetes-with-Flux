@@ -153,3 +153,26 @@ flux get images update
 You can validate by:
 ●
 Checking on the GitHub repo if a new commit has been added by FluxCD
+
+# Fixing Issues with Images
+At this time, you may see the kustomization for the vote app fail. You will see it attempting to
+launch a new pod, however failing with error such as the one below:
+Warning Failed
+13m (x4 over 14m)
+kubelet
+Failed to pull image "schoolofdevops/vote:main-1c01cd25-1684430239":
+rpc error: code = NotFound desc = failed to pull and unpack image
+"docker.io/schoolofdevops/vote:main-1c01cd25-1684430239": failed to
+resolve reference
+"docker.io/schoolofdevops/vote:main-1c01cd25-1684430239":
+docker.io/schoolofdevops/vote:main-1c01cd25-1684430239: not found
+This is because it’s using the schoolofdevops/vote repository instead of yours. You can fix
+it by adding the newName to the following file with the relevant repository name, as in:
+File: deploy/vote/staging/kustomization.yaml
+images:
+- name: schoolofdevops/vote
+newName: xxxxxx/vote
+newTag: main-1c01cd25-1684430239 # {"$imagepolicy":
+"flux-system:vote:tag"}
+Replace xxxxxx/vote with the actual value. Once you make this change, you should see
+Flux reconciling to the kubernetes environment successfully.
