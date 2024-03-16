@@ -65,3 +65,29 @@ Commit All the Pending Manifests
 git add *.yaml
 git commit -am "checking in all the pending manifests"
 git push origin main
+
+# Reset the Existing Environment
+Uninstall Flux components:
+flux check
+flux uninstall --namespace=flux-system --dry-run
+flux uninstall --namespace=flux-system
+flux check
+Now clean up any application deployments running on the cluster.
+Use the following command to determine what has been running on this cluster and which
+namespaces need a clean up:
+kubectl get pods --all-namespaces
+You could delete all the objects for a project by deleting a namespace.
+kubectl delete namespace instavote
+
+Wait for a couple of minutes for everything to be cleaned up.
+Deleting a namespace pending termination
+If you notice a namespace which is pending termination for more than a few minutes, it is likely
+due to a pending finalizer. You could try fixing this issue by using the following sequence. Make
+sure you replace xxxxxx with the name of the pending namespace.
+export PENDING_NAMESPACE=xxxxxx
+kubectl get namespace $PENDING_NAMESPACE -o json
+| tr -d "\n" | sed
+"s/\"finalizers\": \[[^]]\+\]/\"finalizers\": []/"
+| kubectl replace
+--raw /api/v1/namespaces/$PENDING_NAMESPACE/finalize -f -
+Source: Delete a namespace which is pending termination due to a finalizer. · GitHub
