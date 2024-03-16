@@ -111,3 +111,45 @@ When you apply this, you may see it fail due to an authentication error.
 The root cause here is Flux does not have write access to the GitRepository it is referring to to
 fetch and apply the deployment code from. You can provide it with write access by creating a
 secret using the GITHUBUSERNAME and GITHUBTOKEN environment variables defined earlier.
+
+# Generate a Secret to Authenticate with Git Repo
+To do so, begin by creating a Kubernetes secret, this time using the flux utility (yes, Flux does
+have a subcommand to generate secrets).
+flux create secret -h
+flux create secret git -h
+flux create secret git github-instavote \
+--url=https://github.com/xxxxxx/instavote \
+--username=$GITHUB_USER \
+--password=$GITHUB_TOKEN
+kubectl get secrets -n flux-system
+kubectl describe secret -n flux-system github-instavote
+Once a secret is created, update the existing GitRepository source to refer to the secret added
+above so that now Flux has write access to it.
+e.g. file: flux-infra/clusters/staging/instavote-gitrepository.yaml
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta1
+kind: GitRepository
+metadata:
+name: instvote
+namespace: flux-system
+spec:
+interval: 30s
+ref:
+branch: main
+secretRef:
+name: github-instavote
+url: https://github.com/xxxxxx/instavote.git
+Pay special attention to the secretRef part as below.
+secretRef:
+name: github-instavote
+This is the part that you need to update. Once done, commit the changes and push it to the
+flux-infra repo.
+Once the git repository source is updated with the secret, with the next reconciliation, you
+should see Flux triggering an automated image update. If not, you could run it as:
+flux reconcile image update instavote-all
+
+And check if the image has been committed to GitHub by Flux:
+flux get images update
+You can validate by:
+●
+Checking on the GitHub repo if a new commit has been added by FluxCD
