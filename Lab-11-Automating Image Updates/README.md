@@ -66,3 +66,48 @@ running the following command:
 flux get images policy
 If you would like to further create and publish a new image to test with the policy, you would
 have to run the CI pipeline again and validate if Flux picks it up.
+
+# Auto Committing Image Tags to GitHub
+Mark the Deployment Code for Image Replacement
+Now mark the Kustomization manifests (deployment code) where you would like images to be
+automatically updated by Flux. You can refer to the examples provided here: Automate image
+updates to Git - Flux | GitOps Toolkit
+e.g. file: instavote/deploy/vote/staging/kustomization.yaml
+Before
+images:
+- name: schoolofdevops/vote
+newTag: v8
+After
+images:
+- name: schoolofdevops/vote
+newTag: v8 # {"$imagepolicy": "flux-system:vote:tag"}
+Rules to replace images:
+● If a complete image URL is defined in a manifest, use the policy name,
+image: sofd/vote:v8 # {“$imagepolicy”: “flux-system:vote”}
+`
+● If only the tag is defined, use policy name:tag
+newTag: v8 # {"$imagepolicy": "flux-system:vote:tag"}
+Check for existing image update rules:
+flux get images update
+
+Now, set up an image update rule to automatically update images:
+flux create image update instavote-all \
+--git-repo-ref=instavote \
+--git-repo-path="./deploy/vote/staging" \
+--checkout-branch=main \
+--push-branch=main \
+--author-name=flux \
+--author-email=flux@example.com \
+--commit-template="{{range .Updated.Images}}{{println .}}{{end}}"
+Here, Flux is going to update any images.
+When you apply this, you may see it fail due to an authentication error.
+[sample output]
+✚ generating ImageUpdateAutomation
+► applying ImageUpdateAutomation
+✔ ImageRepository created
+◎ waiting for ImageUpdateAutomation reconciliation
+✗ authentication required
+
+The root cause here is Flux does not have write access to the GitRepository it is referring to to
+fetch and apply the deployment code from. You can provide it with write access by creating a
+secret using the GITHUBUSERNAME and GITHUBTOKEN environment variables defined earlier.
