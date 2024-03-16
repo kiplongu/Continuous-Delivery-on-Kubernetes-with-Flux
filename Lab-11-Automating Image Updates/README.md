@@ -23,3 +23,10 @@ flux bootstrap github
 --network-policy=false \
 --components-extra=image-reflector-controller,image-automation-controller
 flux check
+
+# Setting Up the Image Repository Scanning
+Create an image repository to scan the images from.
+flux get image repository
+flux create image repository vote --image=xxxxx/vote --interval=1m
+flux get image repository
+Replace xxxxx with your Docker Hub account ID used to publish the image.
