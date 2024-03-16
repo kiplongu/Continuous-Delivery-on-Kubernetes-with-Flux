@@ -176,3 +176,74 @@ newTag: main-1c01cd25-1684430239 # {"$imagepolicy":
 "flux-system:vote:tag"}
 Replace xxxxxx/vote with the actual value. Once you make this change, you should see
 Flux reconciling to the kubernetes environment successfully.
+
+
+# Mini Project
+Now that you have set up the image automation workflow for the vote app, it's time to repeat
+the process for the result app.
+For this you have to:
+Create the Image Repository Scanner
+Create the Image Policy
+Since the result app is being deployed with Helm, use the values files for the Helm
+release and update that with Flux
+Create an Update Rule to push the image tags to the git source
+
+Solution
+Create a repository to scan the images from the Docker repository/registry.
+flux create image repository result --image=xxxxx/result --interval=1m
+Create the image policy with:
+flux create image policy result \
+--image-ref=result \
+--select-numeric=asc \
+--filter-regex='^main-[a-f0-9]+-(?P<ts>[0-9]+)' \
+--filter-extract='$ts'
+Create an image update rule, this time to point to the path where the helm chart for the result
+app is.
+flux create image update result \
+--git-repo-ref=instavote \
+--git-repo-path="./deploy/charts/result" \
+--checkout-branch=main \
+--push-branch=main \
+--author-name=flux \
+--author-email=flux@example.com \
+--commit-template="{{range .Updated.Images}}{{println .}}{{end}}"
+
+File: deploy/charts/result/values.yaml
+image:
+repository: dopspdemo/result
+pullPolicy: IfNotPresent
+# Overrides the image tag whose default is the chart appVersion.
+tag: "latest" # {"$imagepolicy": "flux-system:result:tag"}
+flux get image repository
+flux get image policy
+flux get image update
+Since the result app is being deployed with helm, you will also have to update the version
+number on line number 18 in deploy/charts/result/Chart.yaml as:
+
+# This is the chart version. This version number should be incremented
+each time you make changes
+# to the chart and its templates, including the app version.
+# Versions are expected to follow Semantic Versioning
+(https://semver.org/)
+version: 0.1.1
+This will build a new version of the helm chart and deploy it.
+
+Export and Commit Image Reflection and Automation Resources
+After validating the image updates are working, it’s time to generate YAML manifests and push
+them to the repository.
+Begin exporting all the objects created as part of this lab thus far:
+flux export image repository vote | tee vote-imagerepository.yaml
+flux export image policy vote | tee vote-imagepolicy.yaml
+flux export image update instavote-all | tee
+vote-imageupdateautomation.yaml
+flux export image repository result | tee result-imagerepository.yaml
+flux export image policy result | tee result-imagepolicy.yaml
+flux export image update result | tee
+result-imageupdateautomation.yaml
+Add, commit and push these manifests to the repo:
+git status
+git add *.yaml
+git commit -am "add image automation code"
+git push origin main
+This completes the lab on automating image updates, which is a very interesting and useful
+feature of Flux.
