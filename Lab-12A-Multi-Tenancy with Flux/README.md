@@ -348,3 +348,28 @@ cd secrets
 sed -i 's/flux-system/instavote/g' *
 cd ..
 kubectl apply -f secrets
+
+# Updating GitHub Webhook
+From the application code repo (instavote), remove the existing Webhooks which is no longer
+needed.
+Find out the NodePort for webhook-receiver:
+kubectl get services -n flux-system
+
+Where NodePort is set to 31234
+Discover the External IP of the node using
+kubectl get nodes -o wide
+Find the Receiver URL using:
+flux get receivers -n instavote
+
+Generate the Webhook Token again as in:
+WEBHOOK_TOKEN=`date | md5sum | cut -d ' ' -f1`
+echo $WEBHOOK_TOKEN
+Update this token in the Kubernetes secret as in:
+kubectl -n instavote \
+create secret generic webhook-token \
+--from-literal=token=$WEBHOOK_TOKEN \
+--dry-run=client -o yaml | kubectl apply -f -
+Add a brand new webhook to your deploy repo (e.g. xxxx/instavote-deploy) as in:
+
+Validate that its in green:
+And you have the auto trigger from GitHub to Flux configured again.
