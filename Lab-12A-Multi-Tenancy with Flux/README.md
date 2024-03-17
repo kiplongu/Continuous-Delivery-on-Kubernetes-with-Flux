@@ -276,3 +276,13 @@ mkdir projects/base/instavote
 flux create tenant instavote
 --with-namespace=instavote \
 --export > ./projects/base/instavote/rbac.yaml
+
+
+# Create GitRepository to start tracking project deployment repo:
+flux create source git instavote-deploy \
+--namespace=instavote \
+--url=https://github.com/xxxxxx/instavote-deploy \
+--branch=main \
+--export >
+./projects/base/instavote/instavote-deploy-gitrepository.yaml
+Replace xxxxxx with actual repo.
