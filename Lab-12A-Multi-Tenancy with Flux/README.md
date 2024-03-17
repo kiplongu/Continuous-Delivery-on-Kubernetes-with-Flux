@@ -295,3 +295,9 @@ flux create kustomization instavote-deploy \
 --path="./flux" \
 --export >
 ./projects/base/instavote/instavote-deploy-kustomization.yaml
+
+# Auto-generate kustomization.yaml (assembly) for base:
+cd projects/base/instavote
+kustomize create --autodetect
+cd ../../..
+
