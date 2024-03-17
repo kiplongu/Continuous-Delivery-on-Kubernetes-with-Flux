@@ -172,3 +172,11 @@ git add *
 git status
 git commit -am "adding deployment repo code"
 git push origin main
+
+# Import Secrets
+Switch to the path which contains the secrets directory.
+ls secrets/
+kubectl create namespace instavote
+kubectl apply -f secrets/
+kubectl get secrets
+kubectl get secrets -n flux-system
