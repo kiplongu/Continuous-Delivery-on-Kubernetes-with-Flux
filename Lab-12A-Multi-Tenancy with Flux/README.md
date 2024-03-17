@@ -211,4 +211,41 @@ Repo and Paths:
 ● vote-imageupdateautomation.yaml
 ● result-imageupdateautomation.yaml
 
-
+# Add a Patch to flux-system
+You would have to add the patch to expose the webhook receiver to flux-system again.
+Make sure you have cloned your own copy of the flux-fleet repo. If not, do so before
+proceeding.
+git clone https://github.com/xxxxxx/flux-fleet.git
+Replace xxxxxx with actual.
+Start by adding the patch file:
+File :
+flux-fleet/clusters/staging/flux-system/expose-webhook-receiver.yaml
+apiVersion: v1
+kind: Service
+metadata:
+name: webhook-receiver
+namespace: flux-system
+spec:
+ports:
+- name: http
+port: 80
+protocol: TCP
+targetPort: http-webhook
+nodePort: 31234
+selector:
+app: notification-controller
+type: NodePort
+And update the kustomization.yaml to apply the patch.
+File: flux-fleet/clusters/staging/flux-system/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- gotk-components.yaml
+- gotk-sync.yaml
+patchesStrategicMerge:
+- expose-webhook-receiver.yaml
+Commit the changes as in:
+cd flux-fleet/clusters/staging/flux-system/
+git add expose-webhook-receiver.yaml
+git commit -am "add patch to expose webhook receiver"
+git push origin main
