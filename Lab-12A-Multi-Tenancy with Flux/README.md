@@ -270,3 +270,9 @@ Your project directory for onboarding instavote should look like:
 To get there, begin by adding the project directory:
 cd flux-fleet
 mkdir projects/base/instavote
+
+
+# Create RBAC for the Project/Tenant with Flux:
+flux create tenant instavote
+--with-namespace=instavote \
+--export > ./projects/base/instavote/rbac.yaml
