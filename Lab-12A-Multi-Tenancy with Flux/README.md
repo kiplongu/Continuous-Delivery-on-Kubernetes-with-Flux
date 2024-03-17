@@ -142,3 +142,33 @@ git add *
 git commit -am "generated deploy repo scaffold"
 git push origin main
 
+# Migrate the Deployment Code
+Copy over the deploy code from the app repository i.e. xxxx/instavote repository to the
+newly created instavote-deploy repo.
+export DEPLOY_REPO=<absolute_path_to_deploy_repo>
+cd instavote/deploy
+cp -r charts/* $DEPLOY_REPO/helm/charts/
+cp -r vote worker redis $DEPLOY_REPO/kustomize/
+From your previous flux-infra repository, copy over the existing flux sync manifests from
+clusters/staging/ to the instavote-deploy/flux/base/ path.
+.
+├── flux
+│
+├── base
+│
+│
+└── < copy all flux sync manifests here... >
+cd ~/flux-infra/clusters/staging/
+cp *.yaml $DEPLOY_REPO/flux/base/
+
+From the instavote-deploy/flux/base path, generate a new kustomization.yaml as
+in:
+kustomize create --autodetect
+Validate by running:
+cat kustomization.yaml
+Check in all the code added to the instavote-deploy path:
+cd instavote-deploy
+git add *
+git status
+git commit -am "adding deployment repo code"
+git push origin main
