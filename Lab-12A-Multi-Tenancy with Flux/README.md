@@ -341,3 +341,10 @@ Path: instavote-deploy/flux/base
 sed -i 's/flux-system/instavote/g' *
 git commit -am "updated namespace for deploy code"
 git push origin main
+
+
+# Also recreate secrets in the instavote namespace as in:
+cd secrets
+sed -i 's/flux-system/instavote/g' *
+cd ..
+kubectl apply -f secrets
