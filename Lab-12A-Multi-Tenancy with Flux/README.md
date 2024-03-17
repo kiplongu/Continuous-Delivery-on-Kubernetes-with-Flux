@@ -180,3 +180,35 @@ kubectl create namespace instavote
 kubectl apply -f secrets/
 kubectl get secrets
 kubectl get secrets -n flux-system
+
+flux create image repository vote --image=kiplongu/vote --interval=1m --export > vote-imagerepository.yaml
+flux create image repository result --image=xxxxx/result --interval=1m
+
+# Modify Sync Manifests
+What should change?
+GitRepository source should now point to instavote-deploy instead of instavote
+as earlier.
+Image Update Automation should now push to instavote-deploy instead of
+instavote
+Path to helm and kustomize relative to GitRepository should now point to
+● helm/chart instead of /deploy/helm
+● and kustomize/ instead of /deploy/
+cd $DEPLOY_REPO/flux/base/
+grep github * | grep instavote
+grep deploy *
+The following is a list of files you may have to modify:
+✳ GitHub Repo URL :
+instavote-gitrepository.yaml
+github-instavote-provider.yaml
+Paths:
+● redis-staging-kustomization.yaml
+● result-helmrelease.yaml or result-staging-helmrelease.yaml
+● result-imageupdateautomation.yaml
+● vote-imageupdateautomation.yaml
+● vote-staging-kustomization.yaml
+● worker-staging-kustomization.yaml
+Repo and Paths:
+● vote-imageupdateautomation.yaml
+● result-imageupdateautomation.yaml
+
+
