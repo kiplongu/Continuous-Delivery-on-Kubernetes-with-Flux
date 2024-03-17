@@ -301,3 +301,35 @@ cd projects/base/instavote
 kustomize create --autodetect
 cd ../../..
 
+# Now generate the staging overlay to provide the path to staging, sync the overlay from the
+deploy repo:
+file: projects/staging/instavote-deploy-kustomization.yaml
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta1
+kind: Kustomization
+metadata:
+name: instavote-deploy
+namespace: instavote
+spec:
+path: ./flux/staging
+And add the project, as well as the patch files to kustomization.yaml. For example:
+
+file: projects/staging/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- ../base/facebooc
+- ../base/instavote
+patches:
+- path: facebooc-deploy-kustomization.yaml
+- path: instavote-deploy-kustomization.yaml
+git add projects/*
+git commit -am "add a new tenant"
+Since flux-fleet/cluster/staging/onboard-projects is already reading any new
+additions to flux-fleet/projects, it should automatically pull the sync manifests from the
+instavote-deploy repo, create the resources, including sources, kustomizations,
+helmreleases, etc., and start reconciling with the Kubernetes cluster, just like as it were before
+you reset the cluster. This time though, it is running as one of the tenants of the flux-fleet,
+with an added layer of protection/isolation with RBAC policies.
+To trigger this process, all you need to do now is to push the changes to the Git Repository.
+That's the power of GitOps.
+git push origin main
