@@ -286,3 +286,12 @@ flux create source git instavote-deploy \
 --export >
 ./projects/base/instavote/instavote-deploy-gitrepository.yaml
 Replace xxxxxx with actual repo.
+
+# Create the Flux kustomization to import the sync manifests and apply them:
+flux create kustomization instavote-deploy \
+--namespace=instavote \
+--service-account=instavote \
+--source=GitRepository/instavote-deploy \
+--path="./flux" \
+--export >
+./projects/base/instavote/instavote-deploy-kustomization.yaml
