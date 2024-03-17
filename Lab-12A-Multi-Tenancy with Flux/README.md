@@ -333,3 +333,11 @@ with an added layer of protection/isolation with RBAC policies.
 To trigger this process, all you need to do now is to push the changes to the Git Repository.
 That's the power of GitOps.
 git push origin main
+
+# Updating Namespace Configs
+
+You could update the namespace configurations for deployment manifests:
+Path: instavote-deploy/flux/base
+sed -i 's/flux-system/instavote/g' *
+git commit -am "updated namespace for deploy code"
+git push origin main
