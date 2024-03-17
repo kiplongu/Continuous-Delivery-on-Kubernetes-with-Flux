@@ -249,3 +249,24 @@ cd flux-fleet/clusters/staging/flux-system/
 git add expose-webhook-receiver.yaml
 git commit -am "add patch to expose webhook receiver"
 git push origin main
+
+# Prepare the Project for Onboarding
+Your project directory for onboarding instavote should look like:
+└── projects
+├── base
+│
+└── instavote
+│
+├── instavote-deploy-gitrepository.yaml
+│
+├── instavote-deploy-kustomization.yaml
+│
+├── kustomization.yaml
+│
+└── rbac.yaml
+└── staging
+├── instavote-deploy-kustomization.yaml
+└── kustomization.yaml
+To get there, begin by adding the project directory:
+cd flux-fleet
+mkdir projects/base/instavote
