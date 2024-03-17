@@ -373,3 +373,9 @@ Add a brand new webhook to your deploy repo (e.g. xxxx/instavote-deploy) as in:
 
 Validate that its in green:
 And you have the auto trigger from GitHub to Flux configured again.
+
+
+# Reference
+
+To create a private fork of the flux-fleet repository, duplicate it instead using the
+procedure documented here: Duplicating a repository - GitHub Docs
