@@ -353,3 +353,37 @@ Terminal B
 watch kubectl describe ing vote-canary
 
 Try doing a few rollouts to understand how it works completely.
+
+# Testing Automated Rollbacks
+While doing analysis,
+Flagger collects the metrics at every interval
+Compares the errors with the threshold
+● If errors =< threshold, proceeds with the next iteration / promotion
+● If errors > threshold, it halts and rolls back
+To test the rollback, you need to introduce a problem and make the vote app through 5xx
+errors.
+To do so, you could stop the redis service and submit post requests with vote added. It would
+fail.
+Pre Check. When redis is available, the following request should return a valid html output.
+Run the following from the workstation where you have added the hosts entry pointing to
+vote.example.com:
+curl -sS -X POST --data "vote=a" http://vote.example.com
+
+Now suspend the redis kustomization and knock off the service for redis
+flux suspend kustomization redis-staging -n instavote
+kubectl delete service redis
+Trigger a rollout:
+kubectl -n instavote set image deploy vote vote=schoolofdevops/v8
+
+Let it progress a few steps. When you want it to roll back, introduce errors by running the
+following command from your workstation (Mac/Windows/Linux where you had edited the
+/hosts file to add the dns entry earlier):
+watch 'curl -sS -X POST --data "vote=a" http://vote.example.com'
+This would try to submit a post request every two seconds, and that should fail and trigger 5xx
+errors on the vote app. Once the errors cross the threshold, you could stop this process with
+^c.
+You should see Flagger detecting that there is an issue and automatically rolling back.
+Restart the redis kustomization as in:
+
+flux resume kustomization redis-staging -n instavote
+flux reconcile kustomization redis-staging -n instavote --with-source
