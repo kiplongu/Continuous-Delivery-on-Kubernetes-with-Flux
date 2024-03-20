@@ -196,3 +196,89 @@ Where,
 deployment for vote should exist, however with 0 replicas.
 horizontalpodautoscaler for vote should be present
 service for vote should not exist
+
+
+# Deploying with Blue/Green Strategy
+
+Study the canary configuration for vote app from setup/vote-canary.yaml at main ·
+lfs269/setup · GitHub
+Copy over to contents of
+https://raw.githubusercontent.com/lfs269/setup/main/flagger/vote-canary.yaml and add it
+as a file: instavote-deploy/kustomize/vote/base/canary.yaml
+Update canary.yaml with the actual Cluster/External IP of the Ingress Controller. Use
+kubectl get svc -n flagger-system to find this IP
+Update the base kustomization for vote as:
+file: instavote-deploy/kustomize/vote/base/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- deployment.yaml
+- hpa.yaml
+- ingress.yaml
+- canary.yaml
+
+Add the analysis configuration for the Blue/Green release with the following values:
+● interval = 30s [wait for this long to get the metrics to analyze]
+● threshold = 3 [fail if errors are greater than this]
+● iterations = 5 [how many times to run analysis to ensure the app is stable]
+file: kustomize/vote/staging/canary.yaml
+
+apiVersion: flagger.app/v1beta1
+kind: Canary
+metadata:
+name: vote
+namespace: instavote
+spec:
+analysis:
+interval: 30s
+threshold: 3
+iterations: 5
+
+Update kustomization.yaml to add canary.yaml as a patch.
+file: kustomize/vote/staging/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- ../base
+patchesStrategicMerge:
+- deployment.yaml
+- canary.yaml
+....
+... file continues
+Path: instavote-deploy/kustomize/vote/staging
+kustomize build
+Commit changes and push to GitHub.
+
+instavote-deploy/kustomize/vote
+git add *
+git status
+git commit -am "adding canary configs"
+git push origin main
+Reconcile:
+flux reconcile kustomization -n instavote vote-staging --with-source
+Once reconciled, validate with:
+kubectl get all -n instavote
+kubectl describe canary vote -n instavote
+kubectl describe ing -n instavote
+
+At this time you should see a new deployment named vote-primary:
+deployment.apps/vote
+2d19h
+deployment.apps/vote-primary
+45s
+0/000
+1/111
+ClusterIP10.8.129.28<none>
+ClusterIP10.8.128.251<none>
+ClusterIP10.8.130.194<none>
+Set of services maintained by Flagger as:
+service/vote
+80/TCP
+15s
+service/vote-canary
+80/TCP
+45s
+service/vote-primary
+80/TCP
+45s
+
