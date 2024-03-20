@@ -310,3 +310,46 @@ To learn how blue/green deployments work, refer to Blue/Green Deployments - Flag
 Note: If you do not see the release progressing, try to generate some traffic using browser
 windows and sending requests to Ingress with hostname e.g. vote.example.com, refresh the
 window a few times while the release is in progress.
+
+# Deploying a Progressive Canary
+Add the analysis configuration for a progressive canary release with the following values:
+
+interval = 10s [wait for this long to get the metrics to analyze]
+threshold = 10 [fail if errors are greater than this ]
+iterations = 5
+stepWeight = 5 [increase the % of live traffic to canary in this step after every interval]
+maxWeight = 50 [maximum % of live traffic to canary before deciding to roll out
+completely]
+file: kustomize/vote/staging/canary.yaml
+apiVersion: flagger.app/v1beta1
+kind: Canary
+metadata:
+name: vote
+namespace: instavote
+spec:
+analysis:
+interval: 10s
+threshold: 10
+maxWeight: 50
+stepWeight: 5
+Commit the changes, push to GitHub. To reconcile the changes now, you need to run the
+kustomization by hand:
+flux resume kustomization vote-staging -n instavote
+flux reconcile kustomization vote-staging -n instavote --with-source
+flux suspend kustomization vote-staging -n instavote
+Validate:
+kubectl get canary vote
+
+When you list the canary, this time you should see the interval, step weight and max weight
+columns showing the value that you had set.
+To trigger rollouts, use set commands again with a new tag. e.g.
+kubectl -n instavote set image deploy vote vote=schoolofdevops/v5
+To monitor, you could use:
+Terminal A
+watch 'kubectl get all -o wide \
+-l "kustomize.toolkit.fluxcd.io/name=vote-staging"'
+
+Terminal B
+watch kubectl describe ing vote-canary
+
+Try doing a few rollouts to understand how it works completely.
