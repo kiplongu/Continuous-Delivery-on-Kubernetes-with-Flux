@@ -282,3 +282,31 @@ service/vote-primary
 80/TCP
 45s
 
+
+
+# Trigger a Blue/Green Deployment
+You could temporarily suspend the kustomization for vote and try rolling out by manually
+setting an image.
+flux suspend kustomization vote-staging -n instavote
+To monitor resources in the instavote namespace without needing to provide the namespace
+every time, set the context to use instavote as the current namespace.
+kubectl config set-context --current --namespace=instavote
+To trigger rollouts, use set commands as follows:
+kubectl -n instavote set image deploy vote vote=schoolofdevops/v2
+You can try rolling out a few times by updating the versions (tags from v1 to v9 are available in
+the repo).
+
+watch 'kubectl get all -o wide \
+-l "kustomize.toolkit.fluxcd.io/name=vote-staging"; \
+kubectl describe canary vote | tail -n 20'
+
+Where you can observe the events related to the rollout.
+
+watch kubectl describe ing
+Where you can see in action that the nginx ingress controller is balancing traffic across:
+
+To learn how blue/green deployments work, refer to Blue/Green Deployments - Flagger.
+
+Note: If you do not see the release progressing, try to generate some traffic using browser
+windows and sending requests to Ingress with hostname e.g. vote.example.com, refresh the
+window a few times while the release is in progress.
