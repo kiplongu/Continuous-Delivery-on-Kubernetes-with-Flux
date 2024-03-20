@@ -135,3 +135,64 @@ To validate, try accessing using either:
 http://vote.example.com in case of the Load Balancer or,
 http://vote.example.com:<NODE_PORT> in case of NodePort service type for
 Nginx.
+
+
+# Changing the Flux Code to Work with Flagger
+While implementing the release strategies, Flagger takes over the management of various
+components of the application components deployed inside Kubernetes, which are currently
+managed completely with FluxCD.
+While setting up deployments for the vote app, in order for Flux not to conflict with Flagger, the
+following changes are needed:
+Flux should stop managing the service. It would exclusively be created and managed
+by Flagger.
+For the deployment, Flux should set the number of replicas to zero, and start managing
+the scale using the Horizontal Pod Autoscaler. This also means Autoscaling
+Configurations should be added.
+Nodeport cannot be used to expose the service as Flagger will create and manage only
+ClusterIP type service.
+file: instavote-deploy/kustomize/vote/base/hpa.yaml
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+name: vote
+namespace: instavote
+spec:
+maxReplicas: 10
+minReplicas: 5
+scaleTargetRef:
+apiVersion: apps/v1
+kind: Deployment
+name: vote
+
+file: instavote-deploy/kustomize/vote/base/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- deployment.yaml
+- hpa.yaml
+- ingress.yaml
+Also, from kustomize/vote/staging/kustomization.yaml file:
+
+Remove reference of service.yaml from base/kustomization.com, as well as
+from staging/kustomization.com
+Set the replicas count to zero for vote staging deployment.
+instavote-deploy/kustomize/vote/staging/kustomization.yaml
+patchesStrategicMerge:
+- deployment.yaml
+replicas:
+- name: vote
+count: 0
+Commit the changes and push to GitHub.
+
+git add *
+git status
+git commit -am "add hpa, remove service management"
+git push origin main
+Validate:
+flux reconcile kustomization -n instavote vote-staging –-with-source
+kubectl get all -n instavote
+
+Where,
+deployment for vote should exist, however with 0 replicas.
+horizontalpodautoscaler for vote should be present
+service for vote should not exist
