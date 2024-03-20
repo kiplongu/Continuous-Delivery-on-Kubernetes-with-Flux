@@ -66,3 +66,72 @@ LoadBalancer
 This is expected, as the nginx ingress controller is set up and now expects you to send requests
 with hostname instead of an IP address. This validates you have a working nginx ingress
 controller set up.
+
+
+# Setting Up Ingress
+Now that the ingress controller is available, it’s time to add an ingress rule for the vote app so
+that it is accessible from outside with nginx.
+You would add the code to create the ingress rule for the vote app in the same place where
+you are deploying all the other components related to the vote app i.e. inside the
+instavote-deploy repository.
+
+file: instavote-deploy/kustomize/vote/base/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+name: vote
+namespace: instavote
+labels:
+app: vote
+annotations:
+kubernetes.io/ingress.class: nginx
+spec:
+rules:
+- host: vote.example.com
+http:
+paths:
+- path: /
+pathType: Prefix
+backend:
+service:
+name: vote
+port:
+number: 80
+And add this file to kustomization.yaml.
+file: instavote-deploy/kustomize/vote/base/kustomization.yaml
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- deployment.yaml
+- service.yaml
+- ingress.yaml
+
+Commit the changes:
+git add ingress.yaml
+git status
+git commit -am "add ingress rule for vote app"
+git push origin main
+and let Flux reconcile those with the cluster.
+flux reconcile kustomization -n instavote vote-staging --with-source
+Validate the ingress rule is added by running:
+kubectl get ing -n instavote
+kubectl describe ing vote -n instavote
+Assuming you do not own vote.example.com you cannot manage this domain and add a global
+DNS entry. However, you could make it point to the Nginx LoadBalancer/NodePort by creating a
+local hosts file entry. On Unix systems, it's in the /etc/hosts file. On Windows, it's at
+C:\Windows\System32\drivers\etc\hosts. You need admin access to edit this file.
+For example, on a Linux or OSX, you could edit it as:
+sudo vim /etc/hosts
+
+And add an entry such as:
+xxx.xxx.xxx.xxx vote.example.com
+Where,
+xxx.xxx.xxx.xxx is the public facing IP address of the LoadBalancer or any Node (in
+case of NodePort) that Nginx is associated with.
+Make sure you are adding this entry to your local workstation from where you are
+launching the browser, not on any remote system.
+To validate, try accessing using either:
+http://vote.example.com in case of the Load Balancer or,
+http://vote.example.com:<NODE_PORT> in case of NodePort service type for
+Nginx.
