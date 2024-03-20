@@ -387,3 +387,21 @@ Restart the redis kustomization as in:
 
 flux resume kustomization redis-staging -n instavote
 flux reconcile kustomization redis-staging -n instavote --with-source
+
+
+# References
+
+Flagger one page reference Flagger
+Flagger Official Documentation Introduction - Flagger
+How Flagger Works How it works - Flagger
+Flagger + Nginx NGINX Canary Deployments - Flagger
+Definitely Read the FAQ FAQ - Flagger
+Release Strategies Deployment Strategies - Flagger
+Different web hooks Flagger Supports Webhooks - Flagger
+Load Tester used by Flagger and what you could do with it GitHub - rakyll/hey: HTTP
+load generator, ApacheBench (ab) replacement, formerly known as rakyll/boom
+Which metrics are used by default and how could you add custom metrics for canary
+analysis Metrics Analysis - Flagger
+Example of using Flux and Flagger with Istio Service Mesh GitHub -
+stefanprodan/gitops-istio: A GitOps recipe for Progressive Delivery with Flux v2, Flagger
+and Istio
